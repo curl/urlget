@@ -1,0 +1,249 @@
+                            _            _   
+                 _   _ _ __| | __ _  ___| |_ 
+                | | | | '__| |/ _` |/ _ \ __|
+                | |_| | |  | | (_| |  __/ |_ 
+                 \__,_|_|  |_|\__, |\___|\__| - Gets your URL!
+                              |___/          
+
+NAME
+        urlget - get a file from a FTP, GOPHER or HTTP server.
+
+SYNOPSIS
+        urlget [options] <url>
+
+DESCRIPTION
+        urlget is a client to get documents/files from servers, using any of
+        the supported protocols. The command is designed to work without user
+        interaction or any kind of interactivity.
+
+OPTIONS
+   The following options may be specified at the command line:
+
+   -d <data> (HTTP ONLY)
+        Sends the specified data in a POST request to the HTTP server. Note
+        that the data is sent exactly as specified with no extra processing.
+        The data is expected to be "urlencoded".
+
+   -f   (HTTP ONLY)
+        Fail silently (no output at all) on server errors. This is mostly done
+        like this to better enable scripts etc to better deal with failed
+        attempts. In normal cases when a HTTP server fails to deliver a
+        document, it returns a HTML document stating so (which often also
+        describes why and more). This flag will prevent urlget from outputting
+        that and fail silently instead.
+
+   -i   (HTTP ONLY)
+        Include the HTTP-header in the output. The HTTP-header includes things
+        like server-name, date of the document, HTTP-version and more...
+
+   -I   (HTTP ONLY)
+        Fetch the HTTP-header only! HTTP-servers feature the command HEAD
+        which this uses to get nothing but the header of a document.
+
+   -k   (HTTP ONLY)
+        Use Keep-Alive connection. There is currently no real gain to use this.
+   -l   (FTP ONLY)
+        When listing an FTP directory, this switch forces a name-only view.
+        Especially useful if you want to machine-parse the contents of an FTP
+        directory since the normal directory view doesn't use a standard look
+        or format.
+
+   -m <seconds>
+        Maximum time in seconds that you allow the whole operation to take.
+        This is useful for preventing your batch jobs from hanging for hours
+        due to slow networks or links going down.
+
+   -o <file>
+        Write output to <file> instead of stdout.
+
+   -O
+        Write output to a local file named like the remote file we get. (Only
+        the file part of the remote file is used, the path is cut off.)
+
+   -r <range>   (HTTP ONLY)
+        Retrieve a byte range (i.e a partial document) from a HTTP/1.1
+        server. Ranges can be specified in a number of ways.
+        0-499           - specifies the first 500 bytes
+        500-999         - specifies the second 500 bytes
+        -500            - specifies the last 500 bytes
+        9500-           - specifies the bytes from offset 9500 and forward
+        0-0,-1          - specifies the first and last byte only(*)
+        500-700,600-799 - specifies 300 bytes from offset 500
+        100-199,500-599 - specifies two separate 100 bytes ranges(*)
+
+        (*) = NOTE that this will cause the server to reply with a multipart
+        response!
+
+   -p <port>
+        Use port other than default for current protocol. This is typically
+        most used together with the proxy-flag (-x).
+
+   -s
+        Silent mode. Don't show progress meter or error messages.  Makes
+        Urlget mute.
+
+   -t
+	Transfer the stdin data to the specified (FTP only) file. Urlget will
+        read everything from stdin until EOF and store with the supplied name.
+
+   -T <file>
+        Like -t, but this transfers the specified local file (FTP only). If
+        there is no file part in the specified URL, Urlget will append the
+        local file name. NOTE that you must use a trailing / on the last
+        directory to really prove to Urlget that there is no file name or
+        urlget will think that your last directory name is the remote file
+        name to use. That will most likely cause the upload operation to fail.
+
+   -u <user:password>
+        Specify user and password to use when fetching. See below for detailed
+        examples of how to use this.
+
+   -v 
+        Makes the fetching more verbose/talkative. Mostly usable for
+        debugging.
+
+   -x <host>
+        Use proxy. The port number to use is set to 1080 when this is used and
+        the port flag (-p) is not.
+
+SIMPLE USAGE
+
+  Get the main page from netscape's web-server:
+
+        urlget http://www.netscape.com/
+
+  Get the root README file from funet's ftp-server:
+
+        urlget ftp://ftp.funet.fi/README
+
+  Get a gopher document from funet's gopher server:
+
+        urlget gopher://gopher.funet.fi
+
+  Get a web page from a server using port 8000:
+
+        urlget http://www.weirdserver.com:8000/
+
+  Get a list of the root directory of an FTP site:
+
+        urlget ftp://ftp.fts.frontec.se/
+
+DOWNLOAD TO A FILE
+
+  Get a web page and store in a local file:
+
+        urlget -o thatpage.html http://www.netscape.com/
+
+  Get a web page and store in a local file, make the local file get the name
+  of the remote document (if no file name part is specified in the URL, this
+  will fail):
+
+        urlget -O http://www.netscape.com/index.html
+
+USING PASSWORDS
+
+ FTP
+
+   To ftp files using name+passwd, include them in the URL like:
+
+        urlget ftp://name:passwd@machine.domain:port/full/path/to/file
+
+   or specify them with the -u flag like
+
+        urlget -u name:passwd ftp://machine.domain:port/full/path/to/file
+
+ HTTP
+
+   The HTTP URL doesn't support user and password in the URL string. Urlget
+   does support that anyway to provide a ftp-style interface and thus you can
+   pick a file like:
+
+        urlget http://name:passwd@machine.domain/full/path/to/file
+
+   or specify user and password separately like in
+
+        urlget -u name:passwd http://machine.domain/full/path/to/file
+
+   NOTE! Since HTTP URLs don't support user and password, you can't use that
+   style when using Urlget via a proxy. You _must_ use the -u style fetch
+   during such circumstances.
+
+ GOPHER
+
+   Urlget features no password support for gopher.
+
+PROXY
+
+ Get a web page using a proxy named my-proxy that uses port 888:
+
+        urlget -p 888 -x my-proxy http://www.web.com/
+
+ Get an ftp file using a proxy named my-proxy that uses port 888:
+
+        urlget -p 888 -x my-proxy ftp://ftp.leachsite.com/README
+
+ Get a file from a HTTP server that requires user and password, using the
+ same proxy as above:
+
+        urlget -u user:passwd -p 888 -x my-proxy http://www.get.this/
+
+RANGES
+
+  With HTTP 1.1 byte-ranges were introduced. Using this, a client can request
+  to get only one or more subparts of a specified document. Urlget supports
+  this with the -r flag.
+
+  Get the first 100 bytes of a document:
+
+        urlget -r 0-99 http://www.get.this/
+
+  Get the last 500 bytes of a document:
+
+        urlget -r -500 http://www.get.this/
+
+UPLOADING
+
+ FTP
+
+   Upload all data on stdin to a specified ftp site:
+
+        urlget -t ftp://ftp.upload.com/myfile
+
+   Upload data from a specified file, login with user and password:
+
+        urlget -T uploadfile -u user:passwd ftp://ftp.upload.com/myfile
+
+   Upload a local file to the remote site, and use the local file name remote
+   too:
+ 
+        urlget -T uploadfile -u user:passwd ftp://ftp.upload.com/
+
+ HTTP
+
+   This is still left to implement.
+
+VERBOSE / DEBUG
+
+  If urlget fails where it isn't supposed to, if the servers don't let you in,
+  if you can't understand the responses: use the -v flag to get VERBOSE
+  fetching. Urlget will output lots of info and all data it sends and receives
+  in order to let the user see all client-server interaction.
+
+        urlget -v ftp://ftp.upload.com/
+
+BUGS
+        Nope. :-)
+
+VERSION
+        This document attempts to describe the usage of urlget 3.2.
+        Written by Daniel Stenberg 1997-12-11.
+
+AUTHORS
+        Daniel Stenberg <Daniel.Stenberg@sth.frontec.se>
+        Rafael Sagula <sagula@inf.ufrgs.br>
+        Bjorn Reese <breese@imada.ou.dk>
+        Johan Anderson <johan@homemail.com>
+        Kjell Ericson <Kjell.Ericson@sth.frontec.se>
+    
+HOMEPAGE
+        http://www.inf.ufrgs.br/~sagula/urlget

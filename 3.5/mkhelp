@@ -1,0 +1,20 @@
+#!/bin/sh
+
+# make the hugehelp() function
+sed -e 's:\\:\\\\:g' -e 's:\":\\\":g' README |
+  awk '
+   BEGIN {
+     print "/* NEVER EVER edit this manually, fix the mkhelp script instead! */";
+     print "#include <stdio.h>";
+     print "void hugehelp(void)";
+     print "{";
+     print "puts ( ";
+   }
+   {
+     printf("\"%s\\n\"\n", $0);
+   }
+   END {
+     print " ) ; ";
+     print "}"
+   }'
+
