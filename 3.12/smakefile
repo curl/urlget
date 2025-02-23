@@ -1,0 +1,102 @@
+########################################################################
+#              _            _   
+#   _   _ _ __| | __ _  ___| |_ 
+#  | | | | '__| |/ _` |/ _ \ __|
+#  | |_| | |  | | (_| |  __/ |_ 
+#   \__,_|_|  |_|\__, |\___|\__| - Gets your URL!
+#                |___/          
+########################################################################
+#
+# Makefile to use with the SAS/C compiler on Amiga.
+#
+CC = sc
+MAKE = smake
+
+OBJS= urlget.o main.o
+
+CPU = 68000
+math = standard
+mathlib=lib:scm.lib
+
+CFLAGS = verbose def REGEX_MALLOC def HAVE_CONFIG_H data=far code=far ign 161 ign 100 ign 183 stackextend CPU=$(CPU) math=$(math)
+LDFLAGS = link verbose CPU=$(CPU) math=$(math)
+LIBS = lib lib:net.lib lib:sc.lib $(mathlib)
+
+
+PRG = urlget
+
+urlget: $(OBJS)
+   $(CC) $(LDFLAGS) $(OBJS) $(LIBS) to $(PRG)
+
+020:
+    $(MAKE) $(PRG) CPU=68020
+
+020FPU:
+    $(MAKE) $(PRG) CPU=68020 math=68882 mathlib=lib:scm881.lib
+
+030:
+    $(MAKE) $(PRG) CPU=68030
+
+030FPU:
+    $(MAKE) $(PRG) CPU=68030 math=68882 mathlib=lib:scm881.lib
+
+040:
+    $(MAKE) $(PRG) CPU=68040
+
+040FPU:
+    $(MAKE) $(PRG) CPU=68040 math=68882 mathlib=lib:scm881.lib
+
+060:
+    $(MAKE) $(PRG) CPU=68060
+
+060FPU:
+    $(MAKE) $(PRG) CPU=68060 math=68882 mathlib=lib:scm881.lib
+
+all:
+    $(MAKE) deep_clean -k
+    $(MAKE) $(PRG)
+    rename $(PRG) $(PRG).000
+
+    $(MAKE) deep_clean -k
+    $(MAKE) 020
+    rename $(PRG) $(PRG).020
+
+    $(MAKE) deep_clean -k
+    $(MAKE) 020FPU
+    rename $(PRG) $(PRG).020FPU
+
+    $(MAKE) deep_clean -k
+    $(MAKE) 030
+    rename $(PRG) $(PRG).030
+
+    $(MAKE) deep_clean -k
+    $(MAKE) 030FPU
+    rename $(PRG) $(PRG).030FPU
+
+    $(MAKE) deep_clean -k
+    $(MAKE) 040
+    rename $(PRG) $(PRG).040
+
+    $(MAKE) deep_clean -k
+    $(MAKE) 040FPU
+    rename $(PRG) $(PRG).040FPU
+
+    $(MAKE) deep_clean -k
+    $(MAKE) 060
+    rename $(PRG) $(PRG).060
+
+    $(MAKE) deep_clean -k
+    $(MAKE) 060FPU
+    rename $(PRG) $(PRG).060FPU
+
+deep_clean:
+    delete $(OBJS)
+    delete config.h
+    delete $(PRG)
+
+config.h: config.amiga.h
+    copy config.amiga.h config.h
+    
+urlget.o: urlget.c urlget.h config.h
+
+main.o: main.c config.h
